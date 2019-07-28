@@ -1,16 +1,21 @@
 import math
 
 
-def constraint_penalty(vector, constraints, steepness=100):
+def constraint_penalty(vector, constraints, steepness=10):
     p = 0
     for constraint in constraints:
         # give exponentially exploding penalty 
-        v = constraint(vector)
-        try:
-            p += math.exp(steepness * -v) - 1.0
-        except:
-            print("TOO STEEP")
-            p += math.exp(steepness / 10 * -v) - 1.0
+        nearness = constraint(vector)
+        if nearness > 0:
+#            import pdb;pdb.set_trace()
+            p += (1 / (nearness*10**16 + 10**-32))
+        else:
+            p += 10**32 - nearness*10**16 #math.exp((steepness*-nearness)**2) - 1.0
+        # try:
+        #     p += math.exp(steepness * -nearness) - 1.0
+        # except:
+        #     print("TOO STEEP")
+        #     p += math.exp(steepness / 10 * -nearness) - 1.0
     return p
 
 def sim(vector, reward_function, constraints):
@@ -30,13 +35,13 @@ def optimize(vector, reward_function, constraints):
 
 
     while n<100000:
-        old_vector = best_vector.copy()
+        old_vector = list(best_vector)
         best_reward = sim(best_vector, reward_function, constraints)
         n += 1
         start_reward = best_reward
 
         for i in range(len(best_vector) * 2):
-            new_vector = best_vector.copy()
+            new_vector = list(best_vector)
             new_vector[int(i/2)] += learning_rate * (-1)**i
             new_reward = sim(new_vector, reward_function, constraints)
             improvement = new_reward - best_reward
@@ -62,8 +67,3 @@ def optimize(vector, reward_function, constraints):
     print("Final best vector/score {0} / {1}".format(best_vector, best_reward))
     return best_vector
 
-
-constraints = [lambda x: 9 - sum([y**2 for y in x]),
-    lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: x[2]-1]
-
-optimize([0, 0, 0], lambda x: sum(x) + x[0], constraints)
