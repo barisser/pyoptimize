@@ -16,4 +16,8 @@ def test_optimization_starting_out_of_constraints():
     constraints = [lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: -3 - x[2]]
 
     solution = pyopt.optimize([9, -3, 16], lambda x: sum(x) + x[0], constraints)
-    assert compare_vectors(solution, [5, -1, -3], 10**-6)    
+    assert compare_vectors(solution, [5, -1, -3], 10**-5)    
+
+#def test_penalty_function():
+    #assert pyopt.penalty_function(0.01) == 10**-14
+    #assert pyopt.penalty_function(0.00001) == 3

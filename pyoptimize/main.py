@@ -1,22 +1,30 @@
 import math
 
 
-def constraint_penalty(vector, constraints, steepness=10):
+def penalty_function(nearness, buff=10**-6):
+    """
+    weak regime --> far from constraint violation
+    strong regime --> close to but not doing constraint violation
+    negative regime --> already in violation of constraints
+
+    Penalty function must be continuous!
+    """
+    if nearness > buff: # weak
+        return 1 / ((buff + 10**-32))
+    elif nearness > 0 and nearness <= buff: # strong
+        return 1 / ((nearness + 10**-32))
+    else: # negative
+        return 10**64 * (1 - nearness)
+
+
+def constraint_penalty(vector, constraints):
     p = 0
     for constraint in constraints:
         # give exponentially exploding penalty 
         nearness = constraint(vector)
-        if nearness > 0:
-#            import pdb;pdb.set_trace()
-            p += (1 / (nearness*10**16 + 10**-32))
-        else:
-            p += 10**32 - nearness*10**16 #math.exp((steepness*-nearness)**2) - 1.0
-        # try:
-        #     p += math.exp(steepness * -nearness) - 1.0
-        # except:
-        #     print("TOO STEEP")
-        #     p += math.exp(steepness / 10 * -nearness) - 1.0
+        p += penalty_function(nearness)
     return p
+
 
 def sim(vector, reward_function, constraints):
     return reward_function(vector) - constraint_penalty(vector, constraints)
@@ -34,7 +42,7 @@ def optimize(vector, reward_function, constraints):
     last_improvement = None
 
 
-    while n<100000:
+    while n < 100000:
         old_vector = list(best_vector)
         best_reward = sim(best_vector, reward_function, constraints)
         n += 1
@@ -49,13 +57,11 @@ def optimize(vector, reward_function, constraints):
             if improvement > 0:
                 best_vector = new_vector
                 best_reward = new_reward
-                #print("Found new best vector {0}  {1}".format(best_vector, best_reward))
                 last_improvement = improvement
 
         round_improvement = best_reward - start_reward
         if round_improvement > 0 and last_improvement:
             learning_rate = learning_rate * round_improvement / last_improvement
-            print(learning_rate)
             last_improvement = round_improvement
 
         if best_vector == old_vector:
@@ -64,6 +70,5 @@ def optimize(vector, reward_function, constraints):
             else:
                 learning_rate = learning_rate / 2.0
 
-    print("Final best vector/score {0} / {1}".format(best_vector, best_reward))
     return best_vector
 

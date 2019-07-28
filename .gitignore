@@ -1,2 +1,4 @@
 *.pyc
 *pycache*
+*.cache*
+*coverage*
