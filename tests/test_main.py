@@ -1,3 +1,5 @@
+import math
+
 import pyoptimize as pyopt
 
 import gym
@@ -21,8 +23,14 @@ def test_optimization_starting_out_of_constraints():
     solution = pyopt.gradient_descent([9, -3, 16], lambda x: sum(x) + x[0], constraints)
     assert compare_vectors(solution, [5, -1, -3], 10**-5)    
 
-
-
+def test_slightly_more_complex_optimization():
+    constraints = []
+    reward_function = lambda y: sum([math.sin(x) * math.exp(-(x-15.0)**2) for x in y])
+    solution = pyopt.gradient_descent([0]*2, reward_function, constraints)
+    # This is a local optima only!
+    assert compare_vectors(solution, [3.099599]*2, 10**-5)
+    # note for some reason above finds global optima if dimensionality is much higher
+    
 
 def gym_reward_function(vector):
     env = gym.make('CartPole-v0')
