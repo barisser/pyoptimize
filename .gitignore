@@ -2,3 +2,6 @@
 *pycache*
 *.cache*
 *coverage*
+*build*
+*dist*
+*egg-info*

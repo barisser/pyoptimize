@@ -1,5 +1,7 @@
 import math
 
+import numpy as np
+
 
 def penalty_function(nearness, buff=10**-6):
     """
@@ -30,7 +32,38 @@ def sim(vector, reward_function, constraints):
     return reward_function(vector) - constraint_penalty(vector, constraints)
     
 
-def optimize(vector, reward_function, constraints):
+def mutate_vector(vector, distance):
+    return vector.copy() + (2 * np.random.rand(*vector.shape) - 1.0) * distance
+
+
+def pop_descent(vector, reward_function, constraints, pop_n):
+    """
+    Form a population of vectors (pop_n).
+    For each vector, perform gradient descent.
+    Out of end results, select top N survivors.
+
+    Out of these survivors, send out 'scout' vectors mutated
+    from each survivor.  The amount of randomness by which
+    they are mutated is a temperature function which is variable.
+    Each scout repeats the gradient descent process.
+    """
+    distance = 0.1
+    pop = [vector]
+    while len(pop) < pop_n:
+        pop.append(mutate_vector(vector, distance))
+
+    for i in range(10):
+        solutions = []
+        for n, p in enumerate(pop):
+            solution = gradient_descent(p, reward_function, constraints)
+            reward = reward_function(solution)
+            solutions.append([solution, reward])
+
+        import pdb;pdb.set_trace()
+
+
+
+def gradient_descent(vector, reward_function, constraints, max_iterations=10**6):
     """
     Constraints are functions which must not return values zero or under.
     So if you want to constraint vector[2] < 5, use constraint 
@@ -42,7 +75,7 @@ def optimize(vector, reward_function, constraints):
     last_improvement = None
 
 
-    while n < 100000:
+    while n < max_iterations:
         old_vector = list(best_vector)
         best_reward = sim(best_vector, reward_function, constraints)
         n += 1
