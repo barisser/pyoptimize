@@ -1,2 +1,2 @@
 test:
-	python -m pytest tests --cov=pyoptimize --pdb
+	python -m pytest -s tests --cov=pyoptimize --pdb

@@ -61,7 +61,7 @@ def remove_duplicate_solutions(solutions_dict):
 
 
 def pop_descent(vector, reward_function, constraints, pop_n,
-    survivors=0.3, iterations=10, jump_distance=0.5):
+    survivors=0.3, iterations=100, jump_distance=0.5):
     """
     Form a population of vectors (pop_n).
     For each vector, perform gradient descent.
@@ -123,6 +123,7 @@ def gradient_descent(vector, reward_function, constraints, max_iterations=10**6)
             if improvement > 0:
                 best_vector = new_vector
                 best_reward = new_reward
+                print("new best:"+str(best_reward))
                 last_improvement = improvement
 
         round_improvement = best_reward - start_reward
