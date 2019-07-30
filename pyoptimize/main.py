@@ -12,10 +12,12 @@ def penalty_function(nearness, buff=10**-6):
 
     Penalty function must be continuous!
     """
-    if nearness > buff: # weak
-        return 1 / ((buff + 10**-32))
-    elif nearness > 0 and nearness <= buff: # strong
-        return 1 / ((nearness + 10**-32))
+    # if nearness > buff: # weak
+    #     return 1 / ((buff + 10**-32))
+    # elif nearness > 0 and nearness <= buff: # strong
+    #     return 1 / ((nearness + 10**-32))
+    if nearness > 0:
+        return 0
     else: # negative
         return 10**64 * (1 - nearness)
 
@@ -71,6 +73,7 @@ def pop_descent(vector, reward_function, constraints, pop_n,
     Each scout repeats the gradient descent process.
     """
     pop = [vector]
+    last_pops = []
 
     for i in range(iterations):
         assert len(pop) <= pop_n
@@ -84,7 +87,12 @@ def pop_descent(vector, reward_function, constraints, pop_n,
             solutions[tuple(solution)] = reward
         solutions = remove_duplicate_solutions(solutions)
         pops = [x[0] for x in sorted(solutions.items(), key=operator.itemgetter(1))[::-1][:int(survivors*pop_n)]]
-        #import pdb;pdb.set_trace()
+        if set(pops) == set(last_pops):
+            # our pops havent changed at all.
+            # abort
+            break
+        last_pops = pops
+#        import pdb;pdb.set_trace()
     return sorted(solutions.items(), key=operator.itemgetter(1))[::-1][0][0]
 
 
@@ -123,7 +131,7 @@ def gradient_descent(vector, reward_function, constraints, max_iterations=10**6)
             last_improvement = round_improvement
 
         if best_vector == old_vector:
-            if learning_rate < 0.00001:
+            if learning_rate < 10**-32:
                 break
             else:
                 learning_rate = learning_rate / 2.0

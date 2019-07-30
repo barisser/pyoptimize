@@ -15,13 +15,13 @@ def test_simple_optimization():
     constraints = [lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: -3 - x[2]]
 
     solution = pyopt.gradient_descent([0, -3, -6], lambda x: sum(x) + x[0], constraints)
-    assert compare_vectors(solution, [5, -1, -3], 10**-3)
+    assert compare_vectors(solution, [5, -1, -3], 10**-12)
 
 def test_optimization_starting_out_of_constraints():
     constraints = [lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: -3 - x[2]]
 
     solution = pyopt.gradient_descent([9, -3, 16], lambda x: sum(x) + x[0], constraints)
-    assert compare_vectors(solution, [5, -1, -3], 10**-5)    
+    assert compare_vectors(solution, [5, -1, -3], 10**-12)    
 
 def test_slightly_more_complex_optimization():
     constraints = []
@@ -37,6 +37,12 @@ def test_pop_descent():
     reward_function = lambda y: sum([math.sin(x) * math.exp(-(x-15.0)**2) for x in y])
     solution = pyopt.pop_descent([0]*2, reward_function, constraints, 20)
     assert compare_vectors(solution, [14.69088]*2, 10**-5)
+
+
+def test_saddle_point():
+    constraints = [lambda x: 1.0 - sum([y**2 for y in x])] # unit circle
+
+
 
 #def test_penalty_function():
     #assert pyopt.penalty_function(0.01) == 10**-14
