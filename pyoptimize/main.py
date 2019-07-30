@@ -1,4 +1,5 @@
 import math
+import operator
 
 import numpy as np
 
@@ -33,10 +34,32 @@ def sim(vector, reward_function, constraints):
     
 
 def mutate_vector(vector, distance):
-    return vector.copy() + (2 * np.random.rand(*vector.shape) - 1.0) * distance
+    v = np.array(vector)
+    return v + (2 * np.random.rand(*v.shape) - 1.0) * distance
 
 
-def pop_descent(vector, reward_function, constraints, pop_n):
+def solutions_close(s1, s2):
+    return np.linalg.norm(np.array(s1)-np.array(s2)) / len(s1) < 0.2
+
+def remove_duplicate_solutions(solutions_dict):
+    s = solutions_dict.keys()
+    d = {}
+    for i in range(len(s)):
+        # FIX ME
+        add = True
+        for k in d:
+#            import pdb;pdb.set_trace()
+            if solutions_close(s[i], k):
+                add = False
+                break
+        if add:
+            d[s[i]] = solutions_dict[s[i]]
+    return d
+
+
+
+def pop_descent(vector, reward_function, constraints, pop_n,
+    survivors=0.3, iterations=10, jump_distance=0.5):
     """
     Form a population of vectors (pop_n).
     For each vector, perform gradient descent.
@@ -47,20 +70,22 @@ def pop_descent(vector, reward_function, constraints, pop_n):
     they are mutated is a temperature function which is variable.
     Each scout repeats the gradient descent process.
     """
-    distance = 0.1
     pop = [vector]
-    while len(pop) < pop_n:
-        pop.append(mutate_vector(vector, distance))
 
-    for i in range(10):
-        solutions = []
+    for i in range(iterations):
+        assert len(pop) <= pop_n
+        while len(pop) < pop_n:
+            pop.append(mutate_vector(vector, jump_distance))
+
+        solutions = {}
         for n, p in enumerate(pop):
             solution = gradient_descent(p, reward_function, constraints)
             reward = reward_function(solution)
-            solutions.append([solution, reward])
-
-        import pdb;pdb.set_trace()
-
+            solutions[tuple(solution)] = reward
+        solutions = remove_duplicate_solutions(solutions)
+        pops = [x[0] for x in sorted(solutions.items(), key=operator.itemgetter(1))[::-1][:int(survivors*pop_n)]]
+        #import pdb;pdb.set_trace()
+    return sorted(solutions.items(), key=operator.itemgetter(1))[::-1][0][0]
 
 
 def gradient_descent(vector, reward_function, constraints, max_iterations=10**6):

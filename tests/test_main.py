@@ -34,8 +34,9 @@ def test_slightly_more_complex_optimization():
 
 def test_pop_descent():
     constraints = []
- #   reward_function = 
-#    solution = pyopt.gradient_descent()    
+    reward_function = lambda y: sum([math.sin(x) * math.exp(-(x-15.0)**2) for x in y])
+    solution = pyopt.pop_descent([0]*2, reward_function, constraints, 20)
+    assert compare_vectors(solution, [14.69088]*2, 10**-5)
 
 #def test_penalty_function():
     #assert pyopt.penalty_function(0.01) == 10**-14
