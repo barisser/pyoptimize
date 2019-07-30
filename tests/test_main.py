@@ -30,13 +30,6 @@ def test_slightly_more_complex_optimization():
     # This is a local optima only!
     assert compare_vectors(solution, [3.099599]*2, 10**-5)
     # note for some reason above finds global optima if dimensionality is much higher
-    
-
-def gym_reward_function(vector):
-    env = gym.make('CartPole-v0')
-    env.reset()
-    assert vector.shape() == (10, 3)
-#    model = 
 
 
 def test_pop_descent():
