@@ -60,7 +60,7 @@ def remove_duplicate_solutions(solutions_dict):
 
 
 
-def pop_descent(vector, reward_function, constraints, pop_n,
+def pop_grad_descent(vector, reward_function, constraints, pop_n,
     survivors=0.3, iterations=100, jump_distance=0.5):
     """
     Form a population of vectors (pop_n).
@@ -92,8 +92,64 @@ def pop_descent(vector, reward_function, constraints, pop_n,
             # abort
             break
         last_pops = pops
-#        import pdb;pdb.set_trace()
     return sorted(solutions.items(), key=operator.itemgetter(1))[::-1][0][0]
+
+
+def buffer_pops(pops, pop_scores, learning_rate, survival_factor):
+    """
+    For a list of [vector, vector_score], add to
+    the population by mutating.
+    Mutate parents probabilistically.  Discard others.
+    """
+    mean = pop_scores.mean()
+    std = pop_scores.std()
+    normalized_scores = (pop_scores - mean) / std 
+    probabilities = np.exp(normalized_scores * survival_factor)
+    probabilities = probabilities / probabilities.sum()
+    next_gen = np.array([pops[x] for x in np.random.choice(range(len(pops)),
+        p=probabilities, size=len(pops))])
+
+    next_gen = next_gen + np.random.normal(size=next_gen.shape, scale=learning_rate)
+    return next_gen
+
+
+def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.01,
+    survival_factor=2.0, max_iterations=10**4):
+    """
+    """
+    pop_scores = np.ones(pop_n)
+    pops = buffer_pops(np.array([vector for _ in range(pop_n)]),
+        pop_scores,
+        learning_rate, survival_factor)
+    n = 0
+    last_improvement = None
+    best = None
+
+    while n < max_iterations:
+        pop_scores = np.ones(pop_n)
+        for i in range(len(pops)):
+            pop_scores[i] = sim(pops[i], reward_function, constraints)
+#        print("mean reward " + str(np.array([x for x in pop_scores if x > -10**32]).mean()))
+        pops = buffer_pops(pops, pop_scores, learning_rate, survival_factor)
+        n += 1
+
+        if n % 100 == 0:
+            
+            if best:
+                improvement = pop_scores.max() - best
+            if last_improvement:
+                if last_improvement > 0 and improvement > 0:
+                    learning_rate = learning_rate * min(2, improvement / last_improvement)
+            
+#            import pdb;pdb.set_trace()
+            if best:
+                last_improvement = improvement
+            best = pop_scores.max()
+
+
+        print(n)
+    import pdb;pdb.set_trace()
+
 
 
 def gradient_descent(vector, reward_function, constraints, max_iterations=10**6):
@@ -123,7 +179,7 @@ def gradient_descent(vector, reward_function, constraints, max_iterations=10**6)
             if improvement > 0:
                 best_vector = new_vector
                 best_reward = new_reward
-                print("new best:"+str(best_reward))
+#                print("new best:"+str(best_reward))
                 last_improvement = improvement
 
         round_improvement = best_reward - start_reward

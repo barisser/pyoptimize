@@ -33,12 +33,10 @@ def convert_to_action(response, env):
     import pdb;pdb.set_trace()
 
 
-def gym_reward_function(width, depth, environment):
+def gym_reward_function(model, environment):
     env = gym.make(environment)
     def func(vector):
         observation = env.reset()
-#        import pdb;pdb.set_trace()
-        model = DenseRect(width, depth, vector)
         r = 0
         for i in range(10**4):
             response = model.run(observation)

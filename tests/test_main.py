@@ -32,16 +32,30 @@ def test_slightly_more_complex_optimization():
     # note for some reason above finds global optima if dimensionality is much higher
 
 
-def test_pop_descent():
+def test_pop_grad_descent():
     constraints = []
     reward_function = lambda y: sum([math.sin(x) * math.exp(-(x-15.0)**2) for x in y])
-    solution = pyopt.pop_descent([0]*2, reward_function, constraints, 20)
+    solution = pyopt.pop_grad_descent([0]*2, reward_function, constraints, 20)
     assert compare_vectors(solution, [14.69088]*2, 10**-5)
+
+
+
+def test_pop_descent():
+    constraints = [lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: -3 - x[2]]
+    reward_function = lambda y: sum(y)
+    solution = pyopt.pop_descent([0]*3, reward_function, constraints, 20)
+    assert compare_vectors(solution, [14.69088]*2, 10**-5)
+
 
 
 def test_saddle_point():
     constraints = [lambda x: 1.0 - sum([y**2 for y in x])] # unit circle
 
+
+def test_buffer_pops():
+    poplist = [[1,2,3],[2,4,4], [1,1,1]]
+    popscores= [1, 1, 1000]
+    pops2 = pyopt.buffer_pops(poplist, popscores, 0.01, 2.0)
 
 
 #def test_penalty_function():
