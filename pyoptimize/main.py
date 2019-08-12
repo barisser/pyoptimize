@@ -99,7 +99,7 @@ def pop_grad_descent(vector, reward_function, constraints, pop_n,
     return sorted(solutions.items(), key=operator.itemgetter(1))[::-1][0][0]
 
 
-def buffer_pops(pops, pop_scores, learning_vector, survival_factor):
+def buffer_pops(pops, pop_scores, learning_vector, survival_factor, top_n=2):
     """
     For a list of [vector, vector_score], add to
     the population by mutating.
@@ -110,10 +110,11 @@ def buffer_pops(pops, pop_scores, learning_vector, survival_factor):
     mean = pop_scores.mean()
     std = pop_scores.std()
     normalized_scores = (pop_scores - mean) / std 
+    import pdb;pdb.set_trace()
     probabilities = np.exp(normalized_scores * survival_factor)
     probabilities = probabilities / probabilities.sum()
     next_gen = np.array([pops[x] for x in np.random.choice(range(len(pops)),
-        p=probabilities, size=len(pops))])
+        p=probabilities, size=len(pops) - top_n)])
 
     next_gen = next_gen + np.multiply((np.random.normal(size=next_gen.shape) * 2 - 1.0), learning_vector)
     return next_gen
@@ -166,26 +167,6 @@ def iterate_factors(scores, previous_scores,
         # learning vectors can get expansive
         survival_factor = 3.0
         learning_vector = learning_vector * 2.0
-  
-    sm = np.linalg.norm(learning_vector)
-    reg = LR().fit(pops, scores)
-    sensitivities = abs(reg.coef_) / np.linalg.norm(abs(reg.coef_))
-    learning_vector = np.multiply(learning_vector, sensitivities)
-
-#     pls = PLSR(n_components=len(pops[0]))
-#     pls.fit(scale(pops), scores)
-# #    import pdb;pdb.set_trace()
-#     sm = np.linalg.norm(learning_vector)
-#     learning_vector = abs(np.multiply(learning_vector, pls.coef_.T / abs(pls.coef_).mean()))
-#     learning_vector = learning_vector / np.linalg.norm(learning_vector) * sm
-
-    print(learning_vector)
-    print(np.linalg.norm(learning_vector))
-
-#    import pdb;pdb.set_trace()
-
-#    mean_score = scores.
-
 
 
     return learning_vector, survival_factor
@@ -208,7 +189,6 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
     previous_pops = None
 
     while n < max_iterations:
-
         previous_scores = pop_scores.copy()
         for i in range(len(pops)):
             pop_scores[i] = sim(pops[i], reward_function, constraints)
@@ -221,19 +201,6 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
             learning_vector, survival_factor)
         if np.linalg.norm(learning_vector) < 10**-6:
             break
-
-#         if n % 100 == 0:
-            
-#             if best:
-#                 improvement = pop_scores.max() - best
-#             if last_improvement:
-#                 if last_improvement > 0 and improvement > 0:
-#                     learning_rate = learning_rate * min(2, improvement / last_improvement)
-            
-# #            import pdb;pdb.set_trace()
-#             if best:
-#                 last_improvement = improvement
-#             best = pop_scores.max()
 
 
         print(n)
@@ -251,7 +218,6 @@ def gradient_descent(vector, reward_function, constraints, max_iterations=10**6)
     best_vector = vector
     n = 0
     last_improvement = None
-
 
     while n < max_iterations:
         old_vector = list(best_vector)
