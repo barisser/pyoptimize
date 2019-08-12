@@ -44,8 +44,19 @@ def test_pop_descent():
     constraints = [lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: -3 - x[2]]
     reward_function = lambda y: sum(y)
     solution = pyopt.pop_descent([0]*3, reward_function, constraints, 20)
-    assert compare_vectors(solution, [14.69088]*2, 10**-5)
+    assert compare_vectors(solution, [5, -1, -3], 10**-5)
 
+def test_pop_descent2():
+    constraints = []
+    def reward_function(v):
+        s = 0
+        p = [3, 5, 11]
+        for n, x in enumerate(v):
+            s += (x%p[n]) ** 2
+        #s = s * math.exp(-(sum([(x-center[m])**2 for m, x in enumerate(v)]))**2)
+        return s
+    solution = pyopt.pop_descent([0]*3, reward_function, constraints)
+    import pdb;pdb.set_trace()
 
 
 def test_saddle_point():
@@ -53,8 +64,8 @@ def test_saddle_point():
 
 
 def test_buffer_pops():
-    poplist = [[1,2,3],[2,4,4], [1,1,1]]
-    popscores= [1, 1, 1000]
+    poplist = np.array([[1,2,3],[2,4,4], [1,1,1]])
+    popscores= np.array([1, 1, 1000])
     pops2 = pyopt.buffer_pops(poplist, popscores, 0.01, 2.0)
 
 
