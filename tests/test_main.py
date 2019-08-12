@@ -31,6 +31,12 @@ def test_slightly_more_complex_optimization():
     assert compare_vectors(solution, [3.099599]*2, 10**-5)
     # note for some reason above finds global optima if dimensionality is much higher
 
+def simple_nonconvex_problem(v):
+    c = [1,2,3, 1, 2]
+    cc = [-5, -11, -2, -5, -7]
+    s = math.exp(-1 * (sum([(v[i]-c[i])**2 for i in range(5)])))*3 
+    s += math.exp(-1 * (sum([(v[i]-cc[i])**2 for i in range(5)])))*20
+    return s
 
 def test_pop_grad_descent():
     constraints = []
@@ -38,7 +44,10 @@ def test_pop_grad_descent():
     solution = pyopt.pop_grad_descent([0]*2, reward_function, constraints, 200)
     assert compare_vectors(solution, [14.69088]*2, 10**-5)
 
-
+def test_pop_grad_descent2():
+    constraints = []
+    solution = pyopt.pop_grad_descent([0]*5, simple_nonconvex_problem, constraints, 200)
+    import pdb;pdb.set_trace()
 
 def test_pop_descent():
     constraints = [lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: -3 - x[2]]
@@ -46,16 +55,10 @@ def test_pop_descent():
     solution = pyopt.pop_descent([0]*3, reward_function, constraints, 20)
     assert compare_vectors(solution, [5, -1, -3], 10**-5)
 
+
 def test_pop_descent2():
     constraints = []
-    def reward_function(v):
-        s = 0
-        p = [3, 5, 11]
-        for n, x in enumerate(v):
-            s += (x%p[n]) ** 2
-        #s = s * math.exp(-(sum([(x-center[m])**2 for m, x in enumerate(v)]))**2)
-        return s
-    solution = pyopt.pop_descent([0]*3, reward_function, constraints)
+    solution = pyopt.pop_descent([0]*5, simple_nonconvex_problem, constraints)
     import pdb;pdb.set_trace()
 
 

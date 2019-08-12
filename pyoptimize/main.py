@@ -165,7 +165,6 @@ def iterate_factors(sh, learning_vector, survival_factor, reset_n, max_fruitless
     if recent_growth == 0: # no max progress !
         # either still converging
         if learning_vector.mean() < 10**-6:
-            #import pdb;pdb.set_trace()
             if reset_n >= exploratory_attempts_max:
                 return -1, 1000, reset_n
             # reset at exploratory value
@@ -175,7 +174,6 @@ def iterate_factors(sh, learning_vector, survival_factor, reset_n, max_fruitless
         else: # try to converge
             learning_vector = learning_vector * 0.5
             survival_factor = 5.0 # strict
-#        import pdb;pdb.set_trace()
 
     return learning_vector, survival_factor, reset_n
 
@@ -201,7 +199,7 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
 
     while n < max_iterations:
         previous_scores = pop_scores.copy()
-        import pdb;pdb.set_trace()
+#        import pdb;pdb.set_trace()
         for i in range(len(pops)):
             pop_scores[i] = sim(pops[i], reward_function, constraints)
         if scorehistory is not None:
