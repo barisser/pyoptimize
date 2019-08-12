@@ -1,6 +1,7 @@
 import math
 import operator
 
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import scale
 from sklearn.decomposition import PCA
@@ -99,7 +100,7 @@ def pop_grad_descent(vector, reward_function, constraints, pop_n,
     return sorted(solutions.items(), key=operator.itemgetter(1))[::-1][0][0]
 
 
-def buffer_pops(pops, pop_scores, learning_vector, survival_factor, top_n=2):
+def buffer_pops(pops, pop_scores, learning_vector, survival_factor, top_fr=0.1):
     """
     For a list of [vector, vector_score], add to
     the population by mutating.
@@ -110,13 +111,21 @@ def buffer_pops(pops, pop_scores, learning_vector, survival_factor, top_n=2):
     mean = pop_scores.mean()
     std = pop_scores.std()
     normalized_scores = (pop_scores - mean) / std 
-    import pdb;pdb.set_trace()
+    osp = pop_scores.copy()
+    osp.sort()
+    nthbest = osp[-top_n]
+
+    topn = max(int(top_fr * len(pops)), 1)
+    best = np.array([pops[n] for n, x in enumerate(pop_scores) if x >= nthbest][:topn])
+
     probabilities = np.exp(normalized_scores * survival_factor)
     probabilities = probabilities / probabilities.sum()
     next_gen = np.array([pops[x] for x in np.random.choice(range(len(pops)),
-        p=probabilities, size=len(pops) - top_n)])
+        p=probabilities, size=len(pops) - topn)])
 
     next_gen = next_gen + np.multiply((np.random.normal(size=next_gen.shape) * 2 - 1.0), learning_vector)
+    next_gen = np.append(next_gen, best, axis=0)
+
     return next_gen
 
 
@@ -136,37 +145,37 @@ def iterate_factors(scores, previous_scores,
     We want high SF when we are converging on a solution.
     We want low SF when we are stuck/converged, or in exploratory mode.
     """
-    smean = scores.mean()
-    nm = scores.max()
-    psmean = previous_scores.mean()
-    pm = previous_scores.max()
-    sstd = scores.std()
-    pstd = previous_scores.std()
-    if psmean == 1 and pstd == 0:
-        return learning_vector, survival_factor
+    # smean = scores.mean()
+    # nm = scores.max()
+    # psmean = previous_scores.mean()
+    # pm = previous_scores.max()
+    # sstd = scores.std()
+    # pstd = previous_scores.std()
+    # if psmean == 1 and pstd == 0:
+    #     return learning_vector, survival_factor
 
-    max_improvement = nm - pm
-    if max_improvement < 0:
-        # we're not making ANY progress
-        # try to converge
-        survival_factor = 0.5
+    # max_improvement = nm - pm
+    # if max_improvement < 0:
+    #     # we're not making ANY progress
+    #     # try to converge
+    #     survival_factor = 0.5
 
-        if learning_vector < 10**-6:
-            learning_vector = 0.1
-        else:
-            learning_vector = learning_vector 
+    #     if learning_vector < 10**-6:
+    #         learning_vector = 0.1
+    #     else:
+    #         learning_vector = learning_vector 
 
-    elif smean - psmean <= 0:
-        # max's are making progress but average's aren't.
-        # get STRICT
-        survival_factor = 20.0
-        learning_vector = learning_vector * 1.0
-    else:
-        # max's and average's are both making progress.
-        # stay semilax
-        # learning vectors can get expansive
-        survival_factor = 3.0
-        learning_vector = learning_vector * 2.0
+    # elif smean - psmean <= 0:
+    #     # max's are making progress but average's aren't.
+    #     # get STRICT
+    #     survival_factor = 20.0
+    #     learning_vector = learning_vector * 1.0
+    # else:
+    #     # max's and average's are both making progress.
+    #     # stay semilax
+    #     # learning vectors can get expansive
+    #     survival_factor = 3.0
+    #     learning_vector = learning_vector * 2.0
 
 
     return learning_vector, survival_factor
@@ -187,11 +196,13 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
     best = None
     previous_scores = None
     previous_pops = None
+    scorehistory = np.array([])
 
     while n < max_iterations:
         previous_scores = pop_scores.copy()
         for i in range(len(pops)):
             pop_scores[i] = sim(pops[i], reward_function, constraints)
+        scorehistory = np.append(scorehistory, [pop_scores])
 #        print("mean reward " + str(np.array([x for x in pop_scores if x > -10**32]).mean()))
         previous_pops = pops
         pops = buffer_pops(pops, pop_scores, learning_vector, survival_factor)
@@ -202,9 +213,10 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
         if np.linalg.norm(learning_vector) < 10**-6:
             break
 
-
         print(n)
+    sh = np.array(scorehistory).reshape(n, pop_n)
     import pdb;pdb.set_trace()
+    return [pops[n] for n, x in enumerate(pop_scores) if x == pop_scores.max()][0]
 
 
 

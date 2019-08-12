@@ -35,7 +35,7 @@ def test_slightly_more_complex_optimization():
 def test_pop_grad_descent():
     constraints = []
     reward_function = lambda y: sum([math.sin(x) * math.exp(-(x-15.0)**2) for x in y])
-    solution = pyopt.pop_grad_descent([0]*2, reward_function, constraints, 20)
+    solution = pyopt.pop_grad_descent([0]*2, reward_function, constraints, 200)
     assert compare_vectors(solution, [14.69088]*2, 10**-5)
 
 
