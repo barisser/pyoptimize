@@ -1,4 +1,5 @@
 import math
+import multiprocessing as mp
 import operator
 
 import matplotlib.pyplot as plt
@@ -39,6 +40,10 @@ def constraint_penalty(vector, constraints):
 def sim(vector, reward_function, constraints):
     return reward_function(vector) - constraint_penalty(vector, constraints)
     
+def multisim(vectors, reward_function, constraints, pool):
+    def s(vector, constraints):
+        return reward_function(vector) - constraint_penalty(vector, constraints)
+    return pool.starmap(s, [tuple(v, constraints) for v in vectors])
 
 def mutate_vector(vector, distance):
     v = np.array(vector)
@@ -192,9 +197,11 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
     previous_pops = None
     reset_n = 0
     scorehistory = None
+    pool = mp.Pool(4)
 
     while n < max_iterations:
         previous_scores = pop_scores.copy()
+        import pdb;pdb.set_trace()
         for i in range(len(pops)):
             pop_scores[i] = sim(pops[i], reward_function, constraints)
         if scorehistory is not None:
