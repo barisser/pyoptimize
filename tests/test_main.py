@@ -39,6 +39,29 @@ def simple_nonconvex_problem(v):
     return s
 
 
+# -20 to +20= range
+# 10 centers 8 dimensions
+centers_n = 10
+ndims = 10
+centers = np.random.rand(centers_n, ndims) * 40.0 - 20.0
+
+center_weights = np.arange(centers_n)
+center_steepnesses = np.random.random(centers_n) * 4
+
+def hard_nonconvex_problem(v):
+    s = 0
+    for n, c in enumerate(centers):
+        d = np.linalg.norm(v-c)
+        s += np.exp(-(d**2) * center_steepnesses[n]) * center_weights[n]
+    return s
+
+def test_hard_nonconvex():
+    vector_ranges = [[-20, 20]]*ndims
+    solution, score = pyopt.multiple_gradient_descent(vector_ranges,
+        hard_nonconvex_problem, max_iterations=100)
+    assert score >= 5 # this is probabilistic...
+
+
 def test_pop_grad_descent():
     constraints = []
     reward_function = lambda y: sum([math.sin(x) * math.exp(-(x-15.0)**2) for x in y])
@@ -80,6 +103,8 @@ def test_buffer_pops():
     poplist = np.array([[1,2,3],[2,4,4], [1,1,1]])
     popscores= np.array([1, 1, 1000])
     pops2 = pyopt.main.buffer_pops(poplist, popscores, 0.01, 2.0)
+
+
 
 
 #def test_penalty_function():

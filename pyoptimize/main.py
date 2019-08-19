@@ -216,7 +216,7 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
     return [pops[n] for n, x in enumerate(pop_scores) if x == pop_scores.max()][0]
 
 def multiple_gradient_descent(vector_ranges, reward_function,
-    constraints, max_iterations=100, learning_rate=0.01):
+    constraints=None, max_iterations=100, learning_rate=0.01):
     """
     Performs gradient_descent multiple times 
     from random starting points within the vector ranges.
@@ -233,7 +233,7 @@ def multiple_gradient_descent(vector_ranges, reward_function,
         rv = np.random.uniform(0, 1, size=size)
         vector = np.multiply(rv, vector_magnitudes) + vector_mins
         optima_vector, score = gradient_descent(vector, reward_function,
-            constraints, learning_rate=0.01)
+            constraints=constraints, learning_rate=0.01)
         scores[tuple(optima_vector)] = score
 
     best = max(scores, key=scores.get)
