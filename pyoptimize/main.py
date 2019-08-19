@@ -92,7 +92,7 @@ def pop_grad_descent(vector, reward_function, constraints, pop_n,
 
         solutions = {}
         for n, p in enumerate(pop):
-            solution = gradient_descent(p, reward_function, constraints)
+            solution, _ = gradient_descent(p, reward_function, constraints)
             reward = reward_function(solution)
             solutions[tuple(solution)] = reward
         solutions = remove_duplicate_solutions(solutions)
@@ -220,6 +220,28 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
 #    import pdb;pdb.set_trace()
     return [pops[n] for n, x in enumerate(pop_scores) if x == pop_scores.max()][0]
 
+def multiple_gradient_descent(vector_ranges, reward_function, constraints, max_iterations=100):
+    """
+    Performs gradient_descent multiple times 
+    from random starting points within the vector ranges.
+
+    A vector range looks like
+    [[-3, 3], [-4, 4],...[-7, -3]]
+    """
+    scores = {}
+    size = tuple([len(vector_ranges)])
+    vector_magnitudes = np.array([[x[1] - x[0]] for x in vector_ranges])[:, 0]
+    vector_mins = np.array([x[0] for x in vector_ranges])
+#    import pdb;pdb.set_trace()
+    for i in range(max_iterations):
+        rv = np.random.uniform(0, 1, size=size)
+        vector = np.multiply(rv, vector_magnitudes) + vector_mins
+        optima_vector, score = gradient_descent(vector, reward_function, constraints)
+        scores[tuple(optima_vector)] = score
+
+    best = max(scores, key=scores.get)
+    return best, scores[best]
+
 
 
 def gradient_descent(vector, reward_function, constraints, max_iterations=10**6):
@@ -229,7 +251,7 @@ def gradient_descent(vector, reward_function, constraints, max_iterations=10**6)
     lambda vector: 5 - vector[2] 
     """
     learning_rate = 0.01
-    best_vector = vector
+    best_vector = list(vector)
     n = 0
     last_improvement = None
 
@@ -248,7 +270,6 @@ def gradient_descent(vector, reward_function, constraints, max_iterations=10**6)
             if improvement > 0:
                 best_vector = new_vector
                 best_reward = new_reward
-#                print("new best:"+str(best_reward))
                 last_improvement = improvement
 
         round_improvement = best_reward - start_reward
@@ -262,5 +283,5 @@ def gradient_descent(vector, reward_function, constraints, max_iterations=10**6)
             else:
                 learning_rate = learning_rate / 2.0
 
-    return best_vector
+    return np.array(best_vector), best_reward
 
