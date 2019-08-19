@@ -1,18 +1,3 @@
-# Pyoptimize
-
-Mathematical Optimization with Constraints
-
-
-### Purpose
-Attempts to optimize black-box python functions.
-You may also specify constraint functions.
-
-
-# Quickstart
-
-#### Gradient Descent
-
-```
 # Define a reward function
 # reward functions always take a vector as an arg and return a float score to be maximized.
 def reward(vector):
@@ -29,11 +14,7 @@ starting_vector = [1, 2, 3] # note this vector is actually not compliant with ab
 
 # find a local maxima
 import pyoptimize
+
 solution, score = pyoptimize.gradient_descent(starting_vector, reward, constraints)
-```
 
-
-
-
-### Note
-I am not an expert on mathematical optimization.
+print("Found solution: {0}".format(solution))
