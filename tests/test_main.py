@@ -79,7 +79,7 @@ def test_saddle_point():
 def test_buffer_pops():
     poplist = np.array([[1,2,3],[2,4,4], [1,1,1]])
     popscores= np.array([1, 1, 1000])
-    pops2 = pyopt.buffer_pops(poplist, popscores, 0.01, 2.0)
+    pops2 = pyopt.main.buffer_pops(poplist, popscores, 0.01, 2.0)
 
 
 #def test_penalty_function():

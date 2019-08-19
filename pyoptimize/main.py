@@ -2,12 +2,7 @@ import math
 import multiprocessing as mp
 import operator
 
-import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.preprocessing import scale
-from sklearn.decomposition import PCA
-from sklearn.cross_decomposition import PLSRegression as PLSR
-from sklearn.linear_model import LinearRegression as LR
 
 
 def penalty_function(nearness, buff=10**-6):
@@ -60,7 +55,6 @@ def remove_duplicate_solutions(solutions_dict):
         # FIX ME
         add = True
         for k in d:
-#            import pdb;pdb.set_trace()
             if solutions_close(s[i], k):
                 add = False
                 break

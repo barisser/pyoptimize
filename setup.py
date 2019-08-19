@@ -7,6 +7,5 @@ setup(
     license='MIT',
     packages=find_packages(),
     install_requires=[
-        
-    ]
-    )
+        "numpy>=1.15.0",
+        ])
