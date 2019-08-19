@@ -13,10 +13,6 @@ def penalty_function(nearness, buff=10**-6):
 
     Penalty function must be continuous!
     """
-    # if nearness > buff: # weak
-    #     return 1 / ((buff + 10**-32))
-    # elif nearness > 0 and nearness <= buff: # strong
-    #     return 1 / ((nearness + 10**-32))
     if nearness > 0:
         return 0
     else: # negative
@@ -24,6 +20,9 @@ def penalty_function(nearness, buff=10**-6):
 
 
 def constraint_penalty(vector, constraints):
+    if constraints is None:
+        return 0
+
     p = 0
     for constraint in constraints:
         # give exponentially exploding penalty 
@@ -35,7 +34,10 @@ def constraint_penalty(vector, constraints):
 def sim(vector, reward_function, constraints):
     return reward_function(vector) - constraint_penalty(vector, constraints)
     
-def multisim(vectors, reward_function, constraints, pool):
+def multisim(vectors, reward_function, constraints, pool=None):
+    if pool is None:
+        pool = mp.Pool(mp.cpu_count)
+
     def s(vector, constraints):
         return reward_function(vector) - constraint_penalty(vector, constraints)
     return pool.starmap(s, [tuple(v, constraints) for v in vectors])
@@ -61,7 +63,6 @@ def remove_duplicate_solutions(solutions_dict):
         if add:
             d[s[i]] = solutions_dict[s[i]]
     return d
-
 
 
 def pop_grad_descent(vector, reward_function, constraints, pop_n,
@@ -214,7 +215,8 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
 #    import pdb;pdb.set_trace()
     return [pops[n] for n, x in enumerate(pop_scores) if x == pop_scores.max()][0]
 
-def multiple_gradient_descent(vector_ranges, reward_function, constraints, max_iterations=100):
+def multiple_gradient_descent(vector_ranges, reward_function,
+    constraints, max_iterations=100, learning_rate=0.01):
     """
     Performs gradient_descent multiple times 
     from random starting points within the vector ranges.
@@ -230,7 +232,8 @@ def multiple_gradient_descent(vector_ranges, reward_function, constraints, max_i
     for i in range(max_iterations):
         rv = np.random.uniform(0, 1, size=size)
         vector = np.multiply(rv, vector_magnitudes) + vector_mins
-        optima_vector, score = gradient_descent(vector, reward_function, constraints)
+        optima_vector, score = gradient_descent(vector, reward_function,
+            constraints, learning_rate=0.01)
         scores[tuple(optima_vector)] = score
 
     best = max(scores, key=scores.get)
@@ -238,13 +241,13 @@ def multiple_gradient_descent(vector_ranges, reward_function, constraints, max_i
 
 
 
-def gradient_descent(vector, reward_function, constraints, max_iterations=10**6):
+def gradient_descent(vector, reward_function, constraints=None,
+    max_iterations=10**6, learning_rate=0.01, break_learning_rate=10**-32):
     """
     Constraints are functions which must not return values zero or under.
     So if you want to constraint vector[2] < 5, use constraint 
     lambda vector: 5 - vector[2] 
     """
-    learning_rate = 0.01
     best_vector = list(vector)
     n = 0
     last_improvement = None
@@ -266,16 +269,14 @@ def gradient_descent(vector, reward_function, constraints, max_iterations=10**6)
                 best_reward = new_reward
                 last_improvement = improvement
 
-        round_improvement = best_reward - start_reward
-        if round_improvement > 0 and last_improvement:
-            learning_rate = learning_rate * round_improvement / last_improvement
-            last_improvement = round_improvement
 
         if best_vector == old_vector:
-            if learning_rate < 10**-32:
+            if learning_rate < break_learning_rate:
                 break
             else:
                 learning_rate = learning_rate / 2.0
+        elif improvement > 0:
+            learning_rate = learning_rate * 1.1
 
     return np.array(best_vector), best_reward
 
