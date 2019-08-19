@@ -1,7 +1,7 @@
-from main import gradient_descent
-from main import multiple_gradient_descent
-from main import pop_grad_descent
-from main import pop_descent
+from .main import gradient_descent
+from .main import multiple_gradient_descent
+from .main import pop_grad_descent
+from .main import pop_descent
 
-import main
-import nn
+from . import main
+from . import nn
