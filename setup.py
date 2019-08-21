@@ -8,4 +8,5 @@ setup(
     packages=find_packages(),
     install_requires=[
         "numpy>=1.15.0",
-        ])
+        ],
+    tests_require=['pytest-cov', 'pytest', 'gym'])

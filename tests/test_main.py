@@ -41,9 +41,10 @@ def simple_nonconvex_problem(v):
 
 # -20 to +20= range
 # 10 centers 8 dimensions
+size = 10
 centers_n = 10
-ndims = 10
-centers = np.random.rand(centers_n, ndims) * 40.0 - 20.0
+ndims = 4
+centers = np.random.rand(centers_n, ndims) * size*2 - size
 
 center_weights = np.arange(centers_n)
 center_steepnesses = np.random.random(centers_n) * 4
@@ -56,9 +57,9 @@ def hard_nonconvex_problem(v):
     return s
 
 def test_hard_nonconvex():
-    vector_ranges = [[-20, 20]]*ndims
+    vector_ranges = [[-size, size]]*ndims
     solution, score = pyopt.multiple_gradient_descent(vector_ranges,
-        hard_nonconvex_problem, max_iterations=100)
+                                                      hard_nonconvex_problem, max_iterations=20)
     assert score >= 5 # this is probabilistic...
 
 
