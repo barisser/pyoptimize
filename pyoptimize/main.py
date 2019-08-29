@@ -53,15 +53,15 @@ def solutions_close(s1, s2):
 def remove_duplicate_solutions(solutions_dict):
     s = solutions_dict.keys()
     d = {}
-    for i in range(len(s)):
+    for i in s:
         # FIX ME
         add = True
         for k in d:
-            if solutions_close(s[i], k):
+            if solutions_close(i, k):
                 add = False
                 break
         if add:
-            d[s[i]] = solutions_dict[s[i]]
+            d[i] = solutions_dict[i]
     return d
 
 
@@ -155,7 +155,7 @@ def iterate_factors(sh, learning_vector, survival_factor, reset_n, max_fruitless
     means = sh.mean(axis=1)
     # if max rate of growth is positive but decreasing, decrease learningrate
     recent_growth = maxes[-1] - maxes[-(lookback+1)]
-    dd = maxes[-1] - maxes[-(lookback/2 + 1)] * 2 + maxes[-(lookback+1)] # double derivative
+    dd = maxes[-1] - maxes[int(-(lookback/2 + 1))] * 2 + maxes[-(lookback+1)] # double derivative
 
     if recent_growth == 0: # no max progress !
         # either still converging
