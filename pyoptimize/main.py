@@ -1,6 +1,7 @@
 import math
 import multiprocessing as mp
 import operator
+import time
 
 import numpy as np
 
@@ -194,7 +195,6 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
 
     while n < max_iterations:
         previous_scores = pop_scores.copy()
-#        import pdb;pdb.set_trace()
         for i in range(len(pops)):
             pop_scores[i] = sim(pops[i], reward_function, constraints)
         if scorehistory is not None:
@@ -210,9 +210,7 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
         if isinstance(learning_vector, int) and learning_vector == -1:
             break
 
-#        print(n)
     sh = np.array(scorehistory).reshape(n, pop_n)
-#    import pdb;pdb.set_trace()
     return [pops[n] for n, x in enumerate(pop_scores) if x == pop_scores.max()][0]
 
 def multiple_gradient_descent(vector_ranges, reward_function,
@@ -240,14 +238,19 @@ def multiple_gradient_descent(vector_ranges, reward_function,
     return best, scores[best]
 
 
+def discrete_descent(vector, vector_ranges, reward_function, constraints=None,
+    max_iterations=10**6, learning_rate=0.01, break_learning_rate=10**-32):
+    best_vector = list(vector)
+
 
 def gradient_descent(vector, reward_function, constraints=None,
-    max_iterations=10**6, learning_rate=0.01, break_learning_rate=10**-32):
+    max_iterations=10**6, learning_rate=0.01, break_learning_rate=10**-32, show_time=False):
     """
     Constraints are functions which must not return values zero or under.
     So if you want to constraint vector[2] < 5, use constraint 
     lambda vector: 5 - vector[2] 
     """
+    start = time.time()
     best_vector = list(vector)
     n = 0
     last_improvement = None
@@ -278,5 +281,8 @@ def gradient_descent(vector, reward_function, constraints=None,
         elif improvement > 0:
             learning_rate = learning_rate * 1.1
 
+    duration = time.time() - start
+    if show_time:
+        print("Solved in {0} seconds.".format(duration))
     return np.array(best_vector), best_reward
 

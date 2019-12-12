@@ -10,11 +10,18 @@ def reward(vector):
 constraints = [lambda vector: -3 - vector[2], lambda vector: 4 - sum(vector)]
 
 # Choose a starting vector.
-starting_vector = [1, 2, 3] # note this vector is actually not compliant with above constraints
+n_dimensions = 3
+import numpy as np
+starting_vector = np.ones(shape=(n_dimensions)) * 4  # note this vector is actually not compliant with above constraints
 
 # find a local maxima
 import pyoptimize
 
-solution, score = pyoptimize.gradient_descent(starting_vector, reward, constraints)
+solution, score = pyoptimize.gradient_descent(starting_vector, reward, constraints, show_time=True)
 
-print("Found solution: {0}".format(solution))
+print("Found solution: {0} with score {1}".format(solution, score))
+
+
+
+
+
