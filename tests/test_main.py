@@ -2,7 +2,6 @@ import math
 
 import pyoptimize as pyopt
 
-import gym
 import numpy as np
 
 
@@ -63,22 +62,22 @@ def test_hard_nonconvex():
     assert score >= 5 # this is probabilistic...
 
 
-def test_pop_grad_descent():
-    constraints = []
-    reward_function = lambda y: sum([math.sin(x) * math.exp(-(x-9.0)**2) for x in y])
-    solution = pyopt.pop_grad_descent([0]*2, reward_function, constraints, 200)
-    assert compare_vectors(solution, [14.69088]*2, 10**-5)
+# def test_pop_grad_descent():
+#     constraints = []
+#     reward_function = lambda y: sum([math.sin(x) * math.exp(-(x-9.0)**2) for x in y])
+#     solution = pyopt.pop_grad_descent([0]*2, reward_function, constraints, 200)
+#     assert compare_vectors(solution, [14.69088]*2, 10**-5)
 
 # def test_pop_grad_descent2():
 #     constraints = []
 #     solution = pyopt.pop_grad_descent([0]*5, simple_nonconvex_problem, constraints, 200)
 #     import pdb;pdb.set_trace()
 
-def test_pop_descent():
-    constraints = [lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: -3 - x[2]]
-    reward_function = lambda y: sum(y)
-    solution = pyopt.pop_descent([0]*3, reward_function, constraints, 20)
-    assert compare_vectors(solution, [5, -1, -3], 10**-5)
+# def test_pop_descent():
+#     constraints = [lambda x: 5- x[0], lambda x: -1 - x[1], lambda x: -3 - x[2]]
+#     reward_function = lambda y: sum(y)
+#     solution = pyopt.pop_descent([0]*3, reward_function, constraints, 20)
+#     assert compare_vectors(solution, [5, -1, -3], 10**-5)
 
 
 # def test_pop_descent2():

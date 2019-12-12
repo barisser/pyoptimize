@@ -4,4 +4,3 @@ from .main import pop_grad_descent
 from .main import pop_descent
 
 from . import main
-from . import nn
