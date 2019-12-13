@@ -250,19 +250,19 @@ def gradient_descent(vector, reward_function, constraints=None,
     So if you want to constraint vector[2] < 5, use constraint 
     lambda vector: 5 - vector[2] 
     """
+    best_vector = np.array(vector).astype(float)
     start = time.time()
-    best_vector = list(vector)
     n = 0
     last_improvement = None
 
     while n < max_iterations:
-        old_vector = list(best_vector)
+        old_vector = best_vector.copy()
         best_reward = sim(best_vector, reward_function, constraints)
         n += 1
         start_reward = best_reward
 
         for i in range(len(best_vector) * 2):
-            new_vector = list(best_vector)
+            new_vector = best_vector.copy()
             new_vector[int(i/2)] += learning_rate * (-1)**i
             new_reward = sim(new_vector, reward_function, constraints)
             improvement = new_reward - best_reward
@@ -272,8 +272,7 @@ def gradient_descent(vector, reward_function, constraints=None,
                 best_reward = new_reward
                 last_improvement = improvement
 
-
-        if best_vector == old_vector:
+        if (best_vector == old_vector).all():
             if learning_rate < break_learning_rate:
                 break
             else:

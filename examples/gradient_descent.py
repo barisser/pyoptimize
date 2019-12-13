@@ -10,7 +10,7 @@ def reward(vector):
 constraints = [lambda vector: -3 - vector[2], lambda vector: 4 - sum(vector)]
 
 # Choose a starting vector.
-n_dimensions = 3
+n_dimensions = 100
 import numpy as np
 starting_vector = np.ones(shape=(n_dimensions)) * 4  # note this vector is actually not compliant with above constraints
 
