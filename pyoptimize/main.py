@@ -1,3 +1,4 @@
+import logging
 import math
 import multiprocessing as mp
 import operator
@@ -201,7 +202,6 @@ def pop_descent(vector, reward_function, constraints, pop_n=10, learning_rate=0.
             scorehistory = np.append(scorehistory, [pop_scores], axis=0)
         else:
             scorehistory = np.array([pop_scores])
-#        print("mean reward " + str(np.array([x for x in pop_scores if x > -10**32]).mean()))
         previous_pops = pops
         pops = buffer_pops(pops, pop_scores, learning_vector, survival_factor)
         n += 1
@@ -226,7 +226,7 @@ def multiple_gradient_descent(vector_ranges, reward_function,
     size = tuple([len(vector_ranges)])
     vector_magnitudes = np.array([[x[1] - x[0]] for x in vector_ranges])[:, 0]
     vector_mins = np.array([x[0] for x in vector_ranges])
-#    import pdb;pdb.set_trace()
+
     for i in range(max_iterations):
         rv = np.random.uniform(0, 1, size=size)
         vector = np.multiply(rv, vector_magnitudes) + vector_mins
@@ -238,13 +238,9 @@ def multiple_gradient_descent(vector_ranges, reward_function,
     return best, scores[best]
 
 
-def discrete_descent(vector, vector_ranges, reward_function, constraints=None,
-    max_iterations=10**6, learning_rate=0.01, break_learning_rate=10**-32):
-    best_vector = list(vector)
-
-
 def gradient_descent(vector, reward_function, constraints=None,
-    max_iterations=10**6, learning_rate=0.01, break_learning_rate=10**-32, show_time=False):
+    max_iterations=10**6, learning_rate=0.01, break_learning_rate=10**-32,
+    show_time=False, loud=False):
     """
     Constraints are functions which must not return values zero or under.
     So if you want to constraint vector[2] < 5, use constraint 
@@ -271,7 +267,10 @@ def gradient_descent(vector, reward_function, constraints=None,
                 best_vector = new_vector
                 best_reward = new_reward
                 last_improvement = improvement
+                if loud:
+                    print("Found new best vector: {} at reward {}".format(best_vector, best_reward))
 
+                    
         if (best_vector == old_vector).all():
             if learning_rate < break_learning_rate:
                 break
